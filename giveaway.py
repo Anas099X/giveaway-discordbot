@@ -41,11 +41,3 @@ class Giveaway:
       db_cursor.execute(f'SELECT * FROM giveaways')
       return db_cursor.fetchall()
 
-#giveaway_id = create_giveaway("balls", ["entry1", "entry2"], 1, "2024-06-30 12:00:00")
-
-#giveaway = Giveaway("balls")
-
-#db_cursor.execute("DROP TABLE giveaways")
-#db.commit()
-
-#print(giveaway.update("winners", 200))
