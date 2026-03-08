@@ -1,0 +1,8 @@
+DISCORD_TOKEN=
+
+# Database configuration
+HOST=
+USER=
+PASSWORD=
+DATABASE=
+PORT=

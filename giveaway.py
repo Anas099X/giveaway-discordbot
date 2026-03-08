@@ -14,16 +14,15 @@ db = postsql.connect(
 )
 db_cursor = db.cursor()
 
-
-
+db_cursor.execute('CREATE TABLE IF NOT EXISTS giveaways (name TEXT PRIMARY KEY, entries TEXT[], winners INTEGER, end_time TIMESTAMP, channel_id BIGINT, message_id BIGINT)')
+db.commit()
 class Giveaway:
     
     def __init__(self):
      self = None
 
-    def create(self, name, entries, winners, end_time):
-      db_cursor.execute('CREATE TABLE IF NOT EXISTS giveaways (name TEXT PRIMARY KEY, entries TEXT[], winners INTEGER, end_time TEXT )')
-      db_cursor.execute(f'INSERT INTO giveaways (name, entries, winners, end_time) VALUES (%s, %s, %s, %s)', (name, entries, winners, end_time))
+    def create(self, name, entries, winners, end_time, channel_id, message_id):
+      db_cursor.execute(f'INSERT INTO giveaways (name, entries, winners, end_time, channel_id, message_id) VALUES (%s, %s, %s, %s, %s, %s)', (name, entries, winners, end_time, channel_id, message_id))
       db.commit()    
 
     def delete(self, name):
@@ -45,5 +44,8 @@ class Giveaway:
 #giveaway_id = create_giveaway("balls", ["entry1", "entry2"], 1, "2024-06-30 12:00:00")
 
 #giveaway = Giveaway("balls")
+
+#db_cursor.execute("DROP TABLE giveaways")
+#db.commit()
 
 #print(giveaway.update("winners", 200))
