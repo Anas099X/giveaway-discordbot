@@ -67,7 +67,7 @@ def endtime(duration):
 
  end_time = datetime.now() + duration
 
- return end_time   
+ return end_time 
       
 
 
@@ -75,7 +75,7 @@ def format_giveaways(giveaways):
     formatted = []
     if giveaways:
      for giveaway in giveaways:
-        formatted.append(f"- {giveaway[0]} Entries: {len(giveaway[1])} Winners: {giveaway[2]} End Time: {giveaway[3]}")
+        formatted.append(f"### 🎉 {giveaway[0]}\n┣ 👥 Entries: {len(giveaway[1])} ┃ 🏆 Winners: {giveaway[2]} ┃ ⏰ Ends: <t:{int(giveaway[3].timestamp())}:R>")
      return "\n".join(formatted)
     else:
         return "No giveaways found."
@@ -96,8 +96,9 @@ async def create_giveaway_command(interaction: discord.Interaction,name: str, du
     
     duration = f"{duration} {unit.value}"
     input_duration = format_input_time(duration)
+    end_timestamp = int(endtime(input_duration).timestamp())
 
-    msg_embed = discord.Embed(title="Giveaway Created!", description=f"Giveaway Name: {name}\nDuration: {duration}\nWinners: {winners}\n\nCreated on {datetime.now().strftime("%d/%m/%Y")}", color=discord.Color.green())
+    msg_embed = discord.Embed(title="Giveaway Created!", description=f"Giveaway Name: {name}\nEnds <t:{end_timestamp}:R>\nWinners: {winners}\n\nCreated on {datetime.now().strftime("%d/%m/%Y")}", color=discord.Color.green())
     
     class Enter_Giveaway(discord.ui.View):
         @discord.ui.button(label="Enter Giveaway", style=discord.ButtonStyle.green, custom_id="enter")
