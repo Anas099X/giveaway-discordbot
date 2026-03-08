@@ -100,7 +100,7 @@ async def create_giveaway_command(interaction: discord.Interaction,name: str, du
 
     msg_embed = discord.Embed(title="Giveaway Created!", description=f"Giveaway Name: {name}\nEnds <t:{end_timestamp}:R>\nWinners: {winners}\n\nCreated on {datetime.now().strftime("%d/%m/%Y")}", color=discord.Color.green())
     
-    class Enter_Giveaway(discord.ui.View):
+    class Enter_Giveaway_Button(discord.ui.View):
         @discord.ui.button(label="Enter Giveaway", style=discord.ButtonStyle.green, custom_id="enter")
         async def enter_button(self, interaction: discord.Interaction, button: discord.ui.Button):
             giveaway = Giveaway()
@@ -115,7 +115,7 @@ async def create_giveaway_command(interaction: discord.Interaction,name: str, du
             await interaction.response.send_message("You have entered the giveaway!", ephemeral=True)
 
     giveaway = Giveaway()
-    await interaction.response.send_message(embed=msg_embed, view=Enter_Giveaway())
+    await interaction.response.send_message(embed=msg_embed, view=Enter_Giveaway_Button())
     giveaway_message = await interaction.original_response()
     giveaway.create(name,[], winners, endtime(input_duration), giveaway_message.channel.id, giveaway_message.id)
 
