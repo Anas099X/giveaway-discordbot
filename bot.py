@@ -35,7 +35,7 @@ async def check_giveaways():
             #check giveaway entries
             if giveaway[1]:
              winners_list = pick_winner(giveaway[1],giveaway[2])
-             await main_msg.reply(f"**🎉 Winners are {' '.join(f'<@{w}>' for w in winners_list)}** 🎉")
+             await main_msg.reply(f"**🎉 Winners: {' '.join(f'<@{w}>' for w in winners_list)}** 🎉")
             else:
              await main_msg.reply("**🎉 No one entered the giveaway! 🎉**")
 
@@ -57,15 +57,10 @@ def format_input_time(giveaway):
    giveaway_time = giveaway
    num, unit = giveaway_time.split()
    num = int(num)
+    
+    #returns needed time format
+   return timedelta(**{unit: num})
 
-   if unit in ["second","seconds","s"]:
-      return timedelta(seconds=num)
-   elif unit in ["minute","minutes","m"]:
-      return timedelta(minutes=num)
-   elif unit in ["hour","hours","h"]:
-      return timedelta(hours=num)
-   elif unit in ["day","days","d"]:
-      return timedelta(days=num)
    
 
 def endtime(duration):
@@ -86,14 +81,23 @@ def format_giveaways(giveaways):
         return "No giveaways found."
 
     
-# add task command
+#create command
 @giveaway_group.command(name="create",description="Create a giveaway")
-async def add_giveaway_command(interaction: discord.Interaction,name: str, duration: str, winners: int):
-
+@app_commands.choices(
+    unit=[
+        app_commands.Choice(name="seconds", value="seconds"),
+        app_commands.Choice(name="minutes", value="minutes"),
+        app_commands.Choice(name="hours", value="hours"),
+        app_commands.Choice(name="days", value="days"),
+    ]
+)
+@app_commands.checks.has_permissions(administrator=True)
+async def create_giveaway_command(interaction: discord.Interaction,name: str, duration: int, unit: app_commands.Choice[str], winners: int):
+    
+    duration = f"{duration} {unit.value}"
     input_duration = format_input_time(duration)
-    embed_time = str(input_duration).split(",")[0]
 
-    msg_embed = discord.Embed(title="Giveaway Created!", description=f"Giveaway Name: {name}\nDuration: {embed_time}\nWinners: {winners}\n\nCreated on {datetime.now().strftime("%d/%m/%Y")}", color=discord.Color.green())
+    msg_embed = discord.Embed(title="Giveaway Created!", description=f"Giveaway Name: {name}\nDuration: {duration}\nWinners: {winners}\n\nCreated on {datetime.now().strftime("%d/%m/%Y")}", color=discord.Color.green())
     
     class Enter_Giveaway(discord.ui.View):
         @discord.ui.button(label="Enter Giveaway", style=discord.ButtonStyle.green, custom_id="enter")
@@ -102,7 +106,7 @@ async def add_giveaway_command(interaction: discord.Interaction,name: str, durat
             giveaway_data = giveaway.get_one(name)
             print(giveaway_data)
             entries = giveaway_data[0][1]
-            if str(interaction.user.name) in entries:
+            if str(interaction.user.id) in entries:
                 await interaction.response.send_message("You have already entered the giveaway!", ephemeral=True)
                 return
             entries.append(str(interaction.user.id))
@@ -115,13 +119,14 @@ async def add_giveaway_command(interaction: discord.Interaction,name: str, durat
     giveaway.create(name,[], winners, endtime(input_duration), giveaway_message.channel.id, giveaway_message.id)
 
 
-# view tasks command
+# list command
 @giveaway_group.command(name="list",description="List giveaways")
+@app_commands.checks.has_permissions(administrator=True)
 async def view_giveaways_command(interaction: discord.Interaction):
     
     giveaways = Giveaway().get_all()
     
-    class ViewTasks(discord.ui.LayoutView):
+    class View(discord.ui.LayoutView):
     
      container = discord.ui.Container(
         
@@ -133,12 +138,13 @@ async def view_giveaways_command(interaction: discord.Interaction):
    
 
 
-    await interaction.response.send_message(view=ViewTasks())
+    await interaction.response.send_message(view=View())
 
 
 
-# delete giveaway command 
+# delete command 
 @giveaway_group.command(name="end",description="Delete a giveaway")
+@app_commands.checks.has_permissions(administrator=True)
 async def end_giveaway_command(interaction: discord.Interaction, giveaway_name: str, forced: bool = False):
     giveaway = Giveaway()
     if forced:
