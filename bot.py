@@ -94,27 +94,33 @@ def format_giveaways(giveaways):
 @app_commands.checks.has_permissions(administrator=True)
 async def create_giveaway_command(interaction: discord.Interaction,name: str, duration: int, unit: app_commands.Choice[str], winners: int):
     
+    giveaway = Giveaway()
     duration = f"{duration} {unit.value}"
     input_duration = format_input_time(duration)
     end_timestamp = int(endtime(input_duration).timestamp())
 
-    msg_embed = discord.Embed(title="Giveaway Created!", description=f"Giveaway Name: {name}\nEnds <t:{end_timestamp}:R>\nWinners: {winners}\n\nCreated on {datetime.now().strftime("%d/%m/%Y")}", color=discord.Color.green())
+    msg_embed = discord.Embed(title="Giveaway Created!", description=f"Giveaway Name: {name}\nEnds <t:{end_timestamp}:R>\nEntries: {0}\nWinners: {winners}\n\nCreated on {datetime.now().strftime("%d/%m/%Y")}", color=discord.Color.blurple())
     
     class Enter_Giveaway_Button(discord.ui.View):
         @discord.ui.button(label="Enter Giveaway", style=discord.ButtonStyle.green, custom_id="enter")
         async def enter_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-            giveaway = Giveaway()
+
             giveaway_data = giveaway.get_one(name)
-            print(giveaway_data)
             entries = giveaway_data[0][1]
+
             if str(interaction.user.id) in entries:
                 await interaction.response.send_message("You have already entered the giveaway!", ephemeral=True)
                 return
             entries.append(str(interaction.user.id))
             giveaway.update(name, "entries", entries)
-            await interaction.response.send_message("You have entered the giveaway!", ephemeral=True)
 
-    giveaway = Giveaway()
+            updated_entries = len(giveaway.get_one(name)[0][1])
+
+            updated_embed = discord.Embed(title="Giveaway Updated!", description=f"Giveaway Name: {name}\nEnds <t:{end_timestamp}:R>\nEntries: {updated_entries}\nWinners: {winners}\n\nCreated on {datetime.now().strftime("%d/%m/%Y")}", color=discord.Color.green())
+            await interaction.response.send_message("You have entered the giveaway!", ephemeral=True)
+            await interaction.message.edit(embed=updated_embed)
+
+
     await interaction.response.send_message(embed=msg_embed, view=Enter_Giveaway_Button())
     giveaway_message = await interaction.original_response()
     giveaway.create(name,[], winners, endtime(input_duration), giveaway_message.channel.id, giveaway_message.id)
